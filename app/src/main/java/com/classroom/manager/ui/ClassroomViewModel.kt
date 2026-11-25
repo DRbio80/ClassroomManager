@@ -35,7 +35,7 @@ class ClassroomViewModel(application: Application) : AndroidViewModel(applicatio
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val dailyAttendance: StateFlow> =
+   val dailyAttendance: StateFlow> =
         combine(_selectedClassId, _selectedDate) { id, date -> id to date }
             .flatMapLatest { (classId, date) ->
                 if (classId == null) flowOf(emptyList())
