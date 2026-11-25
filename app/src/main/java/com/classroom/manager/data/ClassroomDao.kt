@@ -20,7 +20,11 @@ data class StudentReportSummary(
 
 @Dao
 interface ClassroomDao {
+@Delete
+    suspend fun deleteStudent(student: Student)
 
+    @Delete
+    suspend fun deleteClassroom(classroom: Classroom)
     @Insert
     suspend fun insertClassroom(classroom: Classroom): Long
 
