@@ -22,11 +22,10 @@ jobs:
       - name: Setup Gradle CLI
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Generate Gradle Wrapper if missing
+      - name: Regenerate clean Gradle Wrapper
         run: |
-          if [ ! -f ./gradlew ]; then
-            gradle wrapper --gradle-version 8.7 --distribution-type bin
-          fi
+          rm -rf gradlew gradlew.bat gradle/wrapper
+          gradle wrapper --gradle-version 8.7 --distribution-type bin
           chmod +x gradlew
 
       - name: Build Debug APK
