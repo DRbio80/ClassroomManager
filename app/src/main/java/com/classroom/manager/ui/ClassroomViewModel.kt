@@ -35,13 +35,14 @@ class ClassroomViewModel(application: Application) : AndroidViewModel(applicatio
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-   val dailyAttendance: StateFlow> = combine(_selectedClassId, _selectedDate) { id, date -> id to date }
-        .flatMapLatest { (classId, date) ->
-            if (classId == null) flowOf(emptyList())
-            else dao.getAttendanceForDate(classId, date)
-        }
-        .map { records -> records.associate { it.studentId to it.status } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+    val dailyAttendance: StateFlow> =
+        combine(_selectedClassId, _selectedDate) { id, date -> id to date }
+            .flatMapLatest { (classId, date) ->
+                if (classId == null) flowOf(emptyList())
+                else dao.getAttendanceForDate(classId, date)
+            }
+            .map { records -> records.associate { it.studentId to it.status } }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     val behaviorTypes: StateFlow<List<BehaviorType>> = dao.getAllBehaviorTypes()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -65,12 +66,13 @@ class ClassroomViewModel(application: Application) : AndroidViewModel(applicatio
         ReportRangeCalculator.resolveRange(ReportPeriod.WEEK)
     )
 
-    val classReport: StateFlow<List<StudentReportSummary>> = combine(_selectedClassId, activeDateRange) { id, range ->
-        id to range
-    }.flatMapLatest { (classId, range) ->
-        if (classId == null) flowOf(emptyList())
-        else dao.getClassReportByDateRange(classId, range.startDate, range.endDate)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val classReport: StateFlow<List<StudentReportSummary>> =
+        combine(_selectedClassId, activeDateRange) { id, range ->
+            id to range
+        }.flatMapLatest { (classId, range) ->
+            if (classId == null) flowOf(emptyList())
+            else dao.getClassReportByDateRange(classId, range.startDate, range.endDate)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
         viewModelScope.launch {
