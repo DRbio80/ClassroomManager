@@ -168,7 +168,21 @@ class ClassroomViewModel(application: Application) : AndroidViewModel(applicatio
             dao.deleteBehaviorType(behavior)
         }
     }
+fun deleteStudent(student: Student) {
+        viewModelScope.launch {
+            dao.deleteStudent(student)
+        }
+    }
 
+    fun deleteClassroom(classroom: Classroom) {
+        viewModelScope.launch {
+            if (_selectedClassId.value == classroom.id) {
+                val nextClass = classrooms.value.firstOrNull { it.id != classroom.id }
+                _selectedClassId.value = nextClass?.id
+            }
+            dao.deleteClassroom(classroom)
+        }
+    }
     fun updateReportPeriod(period: ReportPeriod) {
         _reportPeriod.value = period
     }
