@@ -49,6 +49,7 @@ fun ClassroomApp(vm: ClassroomViewModel = viewModel()) {
     var currentTab by remember { mutableIntStateOf(0) }
     var showAddClassDialog by remember { mutableStateOf(false) }
     var showAddStudentsDialog by remember { mutableStateOf(false) }
+    var classroomToDelete by remember { mutableStateOf<Classroom?>(null) }
 
     Scaffold(
         topBar = {
@@ -71,6 +72,9 @@ fun ClassroomApp(vm: ClassroomViewModel = viewModel()) {
                     if (selectedClass != null) {
                         IconButton(onClick = { showAddStudentsDialog = true }) {
                             Icon(Icons.Default.PersonAdd, contentDescription = "إضافة طلاب")
+                        }
+                        IconButton(onClick = { classroomToDelete = selectedClass }) {
+                            Icon(Icons.Default.Delete, contentDescription = "حذف الفصل")
                         }
                     }
                     IconButton(onClick = { showAddClassDialog = true }) {
@@ -168,6 +172,27 @@ fun ClassroomApp(vm: ClassroomViewModel = viewModel()) {
             }
         )
     }
+
+    classroomToDelete?.let { targetClassroom ->
+        AlertDialog(
+            onDismissRequest = { classroomToDelete = null },
+            title = { Text("تأكيد حذف الفصل") },
+            text = { Text("هل أنت متأكد من حذف الفصل \"${targetClassroom.name}\"؟") },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.deleteClassroom(targetClassroom)
+                    classroomToDelete = null
+                }) {
+                    Text("حذف", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { classroomToDelete = null }) {
+                    Text("إلغاء")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -175,6 +200,7 @@ fun AttendanceScreen(vm: ClassroomViewModel) {
     val students by vm.students.collectAsState()
     val attendance by vm.dailyAttendance.collectAsState()
     val date by vm.selectedDate.collectAsState()
+    var studentToDelete by remember { mutableStateOf<Student?>(null) }
 
     Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
         Row(
@@ -194,8 +220,21 @@ fun AttendanceScreen(vm: ClassroomViewModel) {
                 val currentStatus = attendance[student.id]
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text(student.fullName, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(student.fullName, fontWeight = FontWeight.Bold)
+                            IconButton(onClick = { studentToDelete = student }) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "حذف الطالب",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(4.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             AttendanceStatus.entries.forEach { status ->
                                 FilterChip(
@@ -210,6 +249,27 @@ fun AttendanceScreen(vm: ClassroomViewModel) {
             }
         }
     }
+
+    studentToDelete?.let { targetStudent ->
+        AlertDialog(
+            onDismissRequest = { studentToDelete = null },
+            title = { Text("تأكيد حذف الطالب") },
+            text = { Text("هل أنت متأكد من حذف الطالب \"${targetStudent.fullName}\"؟") },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.deleteStudent(targetStudent)
+                    studentToDelete = null
+                }) {
+                    Text("حذف", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { studentToDelete = null }) {
+                    Text("إلغاء")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -217,6 +277,7 @@ fun BehaviorTrackingScreen(vm: ClassroomViewModel) {
     val students by vm.students.collectAsState()
     val behaviors by vm.behaviorTypes.collectAsState()
     var selectedStudent by remember { mutableStateOf<Student?>(null) }
+    var studentToDelete by remember { mutableStateOf<Student?>(null) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(12.dp),
@@ -228,12 +289,21 @@ fun BehaviorTrackingScreen(vm: ClassroomViewModel) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.padding(14.dp).fillMaxWidth(),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp).fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(student.fullName, fontWeight = FontWeight.SemiBold)
-                    Text("رصد مشاركة / سلوك", color = MaterialTheme.colorScheme.primary)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("رصد مشاركة / سلوك", color = MaterialTheme.colorScheme.primary)
+                        IconButton(onClick = { studentToDelete = student }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "حذف الطالب",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -262,6 +332,27 @@ fun BehaviorTrackingScreen(vm: ClassroomViewModel) {
             confirmButton = {
                 TextButton(onClick = { selectedStudent = null }) {
                     Text("إغلاق")
+                }
+            }
+        )
+    }
+
+    studentToDelete?.let { targetStudent ->
+        AlertDialog(
+            onDismissRequest = { studentToDelete = null },
+            title = { Text("تأكيد حذف الطالب") },
+            text = { Text("هل أنت متأكد من حذف الطالب \"${targetStudent.fullName}\"؟") },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.deleteStudent(targetStudent)
+                    studentToDelete = null
+                }) {
+                    Text("حذف", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { studentToDelete = null }) {
+                    Text("إلغاء")
                 }
             }
         )
